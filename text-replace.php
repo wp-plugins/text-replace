@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Text Replace
-Version: 0.92
+Version: 1.0
 Plugin URI: http://www.coffee2code.com/wp-plugins/
 Author: Scott Reilly
 Author URI: http://www.coffee2code.com
@@ -42,7 +42,7 @@ replacement text.
 */
 
 /*
-Copyright (c) 2004 by Scott Reilly (aka coffee2code)
+Copyright (c) 2004-2005 by Scott Reilly (aka coffee2code)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation 
 files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, 
@@ -57,18 +57,18 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRA
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-function text_replace ($text, $case_sensitive=false) {
+//Define the text to be replaced
+//Careful not to define text that could match partially when you don't want it to:
+//   i.e.  "Me" => "Scott"
+//	would also inadvertantly change "Men" to be "Scottn"
+	
+$text_to_replace = array(
+	":wp:" => "<a href='http://wordpress.org'>WordPress</a>",
+	":wpwiki:" => "<a href='http://wiki.wordpress.org'>WordPress Wiki</a>",
+);
 
-	//Define the text to be replaced
-	//Careful not to define text that could match partially when you don't want it to:
-	//   i.e.  "Me" => "Scott"
-	//	would also inadvertantly change "Men" to be "Scottn"
-	
-	$text_to_replace = array(
-		":wp:" => "<a href='http://wordpress.org'>WordPress</a>",
-		":wpwiki:" => "<a href='http://wiki.wordpress.org'>WordPress Wiki</a>",
-	);
-	
+function c2c_text_replace ($text, $case_sensitive=false) {
+	global $text_to_replace;
 	$oldchars = array("(", ")", "[", "]", "?", ".", ",", "|", "\$", "*", "+", "^", "{", "}");
 	$newchars = array("\(", "\)", "\[", "\]", "\?", "\.", "\,", "\|", "\\\$", "\*", "\+", "\^", "\{", "\}");
 	foreach ($text_to_replace as $old_text => $new_text) {
@@ -80,13 +80,14 @@ function text_replace ($text, $case_sensitive=false) {
 		$text = preg_replace("|(?!<.*?)$old_text(?![^<>]*?>)|$preg_flags", $new_text, $text);
 	}
 	return $text;
-} //end text_replace()
+} //end c2c_text_replace()
 
-add_filter('the_content', 'text_replace', 2);
-add_filter('the_excerpt', 'text_replace', 2);
+add_filter('the_content', 'c2c_text_replace', 2);
+add_filter('the_excerpt', 'c2c_text_replace', 2);
 // Uncomment this next line if you wish to allow users to be able to use text-replacement.  Note that the
-//	priority must be set high enough to avoid <img> tags inserted by the text replace process from geting omitted 
+//	priority must be set high enough to avoid <img> tags inserted by the text replace process from getting omitted 
 //	as a result of the comment text sanitation process, if you use this plugin for smilies, for instance.
-//add_filter('comment_text', 'text_replace', 10);
+//add_filter('get_comment_text', 'c2c_text_replace', 10);
+//add_filter('get_comment_excerpt', 'c2c_text_replace', 10);
 
 ?>
